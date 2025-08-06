@@ -1,0 +1,32 @@
+from opencompass.openicl.icl_prompt_template import PromptTemplate
+from opencompass.openicl.icl_retriever import ZeroRetriever
+from opencompass.openicl.icl_inferencer import GenInferencer
+from opencompass.datasets import CharacterEvalDataset, CharacterEvalCOTEvaluator
+
+charactereval_reader_cfg = dict(
+    input_columns=['role', 'context', 'system_message', 'round_num'],
+    output_column='label',
+    train_split='test')
+
+
+charactereval_infer_cfg = dict(
+    prompt_template=dict(
+        type=PromptTemplate,
+        template="{system_message}\n\n##对话历史##\n{context}\n\n##回复要求##结合上述信息，一步一步思考，以“思考：”作为开始输出思考过程，然后以“回复：”作为开始进行回复。\n\n##回复##"),
+    retriever=dict(type=ZeroRetriever),
+    inferencer=dict(type=GenInferencer)
+)
+
+charactereval_eval_cfg = dict(evaluator=dict(
+    type=CharacterEvalCOTEvaluator, path="/home/aiops/fengxc/HF_models/BaichuanCharRM"))
+
+charactereval_datasets = [
+    dict(
+        abbr='CHARACTER_EVAL_Empathy',
+        type=CharacterEvalDataset,
+        metric_name='Empathy',
+        path='/home/aiops/fengxc/rolecompass/data/charactereval/',
+        reader_cfg=charactereval_reader_cfg,
+        infer_cfg=charactereval_infer_cfg,
+        eval_cfg=charactereval_eval_cfg)
+]
